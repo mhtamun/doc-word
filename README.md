@@ -1,3 +1,6 @@
+# doc-word
+Document writer web application using slate.js
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
