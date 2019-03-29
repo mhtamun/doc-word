@@ -12,12 +12,17 @@
   },
   "private": true,
   "dependencies": {
+    "bootstrap": "^4.3.1",
     "immutable": "^4.0.0-rc.12",
     "react": "^16.8.6",
+    "react-bootstrap": "^1.0.0-beta.6",
     "react-dom": "^16.8.6",
+    "react-icons-kit": "^1.2.1",
     "react-scripts": "2.1.8",
     "slate": "^0.44.12",
-    "slate-react": "^0.21.18"
+    "slate-react": "^0.21.18",
+    "styled-components": "^4.2.0",
+    "styled-icons": "^7.7.0"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -34,5 +39,10 @@
     "not ie <= 11",
     "not op_mini all"
   ],
-  "devDependencies": {}
+  "devDependencies": {
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-jsx-a11y": "^6.2.1",
+    "eslint-plugin-react": "^7.12.4"
+  }
 }
