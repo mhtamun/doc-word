@@ -15,7 +15,9 @@ import {listOl} from 'react-icons-kit/fa/listOl'
 import {listUl} from 'react-icons-kit/fa/listUl'
 import {Editor} from 'slate-react'
 
-import {BoldMark, ItalicMark, UnderlineMark, CodeMark} from './index'
+import {BoldMark, CodeMark, ItalicMark, UnderlineMark} from './index'
+
+const DEFAULT_NODE = 'paragraph'
 
 // Create our initial value...
 const initialValue = Value.fromJSON({
@@ -76,8 +78,60 @@ const initialValue = Value.fromJSON({
                         "object": "text",
                         "leaves": [
                             {
+                                "text": "This is editable "
+                            },
+                            {
+                                "text": "rich",
+                                "marks": [
+                                    {
+                                        "type": "bold"
+                                    }
+                                ]
+                            },
+                            {
+                                "text": " text, "
+                            },
+                            {
+                                "text": "much",
+                                "marks": [
+                                    {
+                                        "type": "italic"
+                                    }
+                                ]
+                            },
+                            {
+                                "text": " better than a "
+                            },
+                            {
+                                "text": "<textarea>",
+                                "marks": [
+                                    {
+                                        "type": "code"
+                                    }
+                                ]
+                            },
+                            {
+                                "text": "!"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "object": "block",
+                "type": "paragraph",
+                "nodes": [
+                    {
+                        "object": "text",
+                        "leaves": [
+                            {
                                 "text":
-                                    "Since it's rich text, you can do things like turn a selection of text "
+                                    "Since it's rich text, you can do things like turn a selection of text ",
+                                "marks": [
+                                    {
+                                        "type": "bold"
+                                    }
+                                ]
                             },
                             {
                                 "text": "bold",
@@ -142,8 +196,14 @@ export default class TextEditor extends Component {
         this.editor = editor
     };
 
+    hasBlock = type => {
+        const { value } = this.state;
+        return value.blocks.some(node => node.type === type)
+    }
+
     // On change, update the app's React state with the new editor value.
     onChange = ({value}) => {
+        console.log(JSON.stringify(value));
         this.setState({value})
     };
 
@@ -156,16 +216,16 @@ export default class TextEditor extends Component {
     };
 
     onBlockClick = (event, type) => {
-        event.preventDefault()
+        event.preventDefault();
 
-        const { editor } = this
-        const { value } = editor
-        const { document } = value
+        const {editor} = this;
+        const {value} = editor;
+        const {document} = value;
 
         // Handle everything but list buttons.
         if (type !== 'bulleted-list' && type !== 'numbered-list') {
-            const isActive = this.hasBlock(type)
-            const isList = this.hasBlock('list-item')
+            const isActive = this.hasBlock(type);
+            const isList = this.hasBlock('list-item');
 
             if (isList) {
                 editor
@@ -177,10 +237,10 @@ export default class TextEditor extends Component {
             }
         } else {
             // Handle the extra wrapping required for list buttons.
-            const isList = this.hasBlock('list-item')
+            const isList = this.hasBlock('list-item');
             const isType = value.blocks.some(block => {
                 return !!document.getClosest(block.key, parent => parent.type === type)
-            })
+            });
 
             if (isList && isType) {
                 editor
@@ -220,7 +280,7 @@ export default class TextEditor extends Component {
     };
 
     renderNode = (props, editor, next) => {
-        const { attributes, children, node } = props;
+        const {attributes, children, node} = props;
 
         switch (node.type) {
             case 'block-quote':
@@ -281,6 +341,7 @@ export default class TextEditor extends Component {
                     onChange={this.onChange}
                     //onKeyDown={this.onKeyDown}
                     renderMark={this.renderMark}
+                    renderNode={this.renderNode}
                 />
             </Fragment>
         )
