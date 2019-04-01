@@ -1,5 +1,6 @@
 import React, {Component, Fragment} from 'react'
 import {Value} from 'slate'
+import {isKeyHotkey} from 'is-hotkey'
 import 'react-bootstrap/dist/react-bootstrap';
 
 import Toolbar from './Toolbar'
@@ -17,170 +18,67 @@ import {Editor} from 'slate-react'
 
 import {BoldMark, CodeMark, ItalicMark, UnderlineMark} from './index'
 
-const DEFAULT_NODE = 'paragraph'
+const DEFAULT_NODE = 'paragraph';
+
+const isTab = isKeyHotkey('tab');
+const isShiftTab = isKeyHotkey('shift+tab');
 
 // Create our initial value...
-const initialValue = Value.fromJSON({
-    "document": {
-        "nodes": [
-            {
-                "object": "block",
-                "type": "paragraph",
-                "nodes": [
-                    {
-                        "object": "text",
-                        "leaves": [
-                            {
-                                "text": "This is editable "
-                            },
-                            {
-                                "text": "rich",
-                                "marks": [
-                                    {
-                                        "type": "bold"
-                                    }
-                                ]
-                            },
-                            {
-                                "text": " text, "
-                            },
-                            {
-                                "text": "much",
-                                "marks": [
-                                    {
-                                        "type": "italic"
-                                    }
-                                ]
-                            },
-                            {
-                                "text": " better than a "
-                            },
-                            {
-                                "text": "<textarea>",
-                                "marks": [
-                                    {
-                                        "type": "code"
-                                    }
-                                ]
-                            },
-                            {
-                                "text": "!"
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                "object": "block",
-                "type": "paragraph",
-                "nodes": [
-                    {
-                        "object": "text",
-                        "leaves": [
-                            {
-                                "text": "This is editable "
-                            },
-                            {
-                                "text": "rich",
-                                "marks": [
-                                    {
-                                        "type": "bold"
-                                    }
-                                ]
-                            },
-                            {
-                                "text": " text, "
-                            },
-                            {
-                                "text": "much",
-                                "marks": [
-                                    {
-                                        "type": "italic"
-                                    }
-                                ]
-                            },
-                            {
-                                "text": " better than a "
-                            },
-                            {
-                                "text": "<textarea>",
-                                "marks": [
-                                    {
-                                        "type": "code"
-                                    }
-                                ]
-                            },
-                            {
-                                "text": "!"
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                "object": "block",
-                "type": "paragraph",
-                "nodes": [
-                    {
-                        "object": "text",
-                        "leaves": [
-                            {
-                                "text":
-                                    "Since it's rich text, you can do things like turn a selection of text ",
-                                "marks": [
-                                    {
-                                        "type": "bold"
-                                    }
-                                ]
-                            },
-                            {
-                                "text": "bold",
-                                "marks": [
-                                    {
-                                        "type": "bold"
-                                    }
-                                ]
-                            },
-                            {
-                                "text":
-                                    ", or add a semantically rendered block quote in the middle of the page, like this:"
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                "object": "block",
-                "type": "block-quote",
-                "nodes": [
-                    {
-                        "object": "text",
-                        "leaves": [
-                            {
-                                "text": "A wise quote."
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                "object": "block",
-                "type": "paragraph",
-                "nodes": [
-                    {
-                        "object": "text",
-                        "leaves": [
-                            {
-                                "text": "Try it out for yourself!"
-                            }
-                        ]
-                    }
-                ]
-            }
-        ]
+const initialValue = Value.fromJSON(
+    {
+        "object": "value",
+        "document": {
+            "object": "document",
+            "data": {},
+            "nodes": [
+                {
+                    "object": "block",
+                    "type": "paragraph",
+                    "data": {},
+                    "nodes": [
+                        {
+                            "object": "text",
+                            "leaves": [
+                                {
+                                    "object": "leaf",
+                                    "text": "A line of text in a paragraph.",
+                                    "marks": []
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
     }
-});
+);
 
+function MarkHotkey(options) {
+    // Grab our options from the ones passed in.
+    const {type, key} = options;
+
+    // Return our "plugin" object, containing the `onKeyDown` handler.
+    return {
+        onKeyDown(event, editor, next) {
+            // If it doesn't match our `key`, let other plugins handle it.
+            if (!event.ctrlKey || event.key !== key) return next();
+
+            // Prevent the default characters from being inserted.
+            event.preventDefault();
+
+            // Toggle the mark `type`.
+            editor.toggleMark(type)
+        },
+    }
+}
+
+// Initialize a plugin for each mark...
+const plugins = [
+    MarkHotkey({key: 'b', type: 'bold'}),
+    MarkHotkey({key: 'i', type: 'italic'}),
+    MarkHotkey({key: 'u', type: 'underline'}),
+    MarkHotkey({key: '`', type: 'code'}),
+];
 
 export default class TextEditor extends Component {
 
@@ -197,14 +95,138 @@ export default class TextEditor extends Component {
     };
 
     hasBlock = type => {
-        const { value } = this.state;
+        const {value} = this.state;
         return value.blocks.some(node => node.type === type)
-    }
+    };
 
     // On change, update the app's React state with the new editor value.
     onChange = ({value}) => {
         console.log(JSON.stringify(value));
         this.setState({value})
+    };
+
+    onKeyDown = (event, editor, next) => {
+
+        const {value} = editor;
+        const {document} = value;
+
+        const isBlockListItemType = this.hasBlock('list-item');
+
+        console.log('Is block list-item type? ' + isBlockListItemType);
+
+        const isParentBlockNumberedListType = value.blocks.some(block => {
+            return !!document.getClosest(block.key, parent => parent.type === 'numbered-list')
+        });
+
+        const isParentBlockBulletedListType = value.blocks.some(block => {
+            return !!document.getClosest(block.key, parent => parent.type === 'bulleted-list')
+        });
+
+        console.log("Is parent block numbered-list type? " + isParentBlockNumberedListType);
+        console.log("Is parent block bulleted-list type? " + isParentBlockBulletedListType);
+
+        if (isTab(event)) {
+
+            // console.log(value.document.nodes.toString());
+
+            let isLevelThree = false;
+
+            value.document.nodes.forEach(block => {
+                console.log('Blocks: ');
+                console.log(block['type']);
+                console.log(block['key']);
+
+                if (block.type === 'numbered-list' || block.type === 'bulleted-list'){
+                    block.nodes.forEach(block => {
+                        console.log('Level 1 Blocks: ');
+                        console.log(block['type']);
+                        console.log(block['key']);
+
+                        isLevelThree = false;
+
+                        if (block.type === 'numbered-list' || block.type === 'bulleted-list'){
+                            block.nodes.forEach(block => {
+                                console.log('Level 2 Blocks: ');
+                                console.log(block['type']);
+                                console.log(block['key']);
+
+                                isLevelThree = false;
+
+                                if (block.type === 'numbered-list' || block.type === 'bulleted-list'){
+                                    console.log('Level 3 Blocks: ');
+                                    console.log(block['type']);
+                                    console.log(block['key']);
+
+                                    isLevelThree = true;
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+
+            value.blocks.forEach(block => {
+                console.log('Current cursor on: ');
+                console.log(block['key']);
+            });
+
+            if (isBlockListItemType && isParentBlockNumberedListType && !isLevelThree) {
+                editor.wrapBlock('numbered-list');
+            } else if (isBlockListItemType && isParentBlockBulletedListType && !isLevelThree) {
+                editor.wrapBlock('bulleted-list');
+            }
+        } else if (isShiftTab(event)) {
+            let isLevelOne = false;
+
+            value.document.nodes.forEach(block => {
+                console.log('Blocks: ');
+                console.log(block['type']);
+                console.log(block['key']);
+
+                if (block.type === 'numbered-list' || block.type === 'bulleted-list'){
+                    block.nodes.forEach(block => {
+                        console.log('Level 1 Blocks: ');
+                        console.log(block['type']);
+                        console.log(block['key']);
+
+                        isLevelOne = true;
+
+                        if (block.type === 'numbered-list' || block.type === 'bulleted-list'){
+                            block.nodes.forEach(block => {
+                                console.log('Level 2 Blocks: ');
+                                console.log(block['type']);
+                                console.log(block['key']);
+
+                                isLevelOne = false;
+
+                                if (block.type === 'numbered-list' || block.type === 'bulleted-list'){
+                                    console.log('Level 3 Blocks: ');
+                                    console.log(block['type']);
+                                    console.log(block['key']);
+
+                                    isLevelOne = false;
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+            if (isBlockListItemType && isParentBlockNumberedListType) {
+                if (isLevelOne){
+                    editor.setBlocks(DEFAULT_NODE).unwrapBlock('list-item').unwrapBlock('numbered-list')
+                } else {
+                    editor.unwrapBlock('list-item').unwrapBlock('numbered-list')
+                }
+            } else if (isBlockListItemType && isParentBlockBulletedListType) {
+                if (isLevelOne){
+                    editor.setBlocks(DEFAULT_NODE).unwrapBlock('list-item').unwrapBlock('bulleted-list')
+                } else {
+                    editor.unwrapBlock('list-item').unwrapBlock('bulleted-list')
+                }
+            }
+        }
+
+        return next();
     };
 
     onMarkClick = (event, type) => {
@@ -259,7 +281,7 @@ export default class TextEditor extends Component {
         }
     };
 
-    renderMark = props => {
+    renderMark = (props, editor, next) => {
         switch (props.mark.type) {
             case 'bold':
                 return <BoldMark {...props} />;
@@ -274,7 +296,7 @@ export default class TextEditor extends Component {
                 return <CodeMark {...props} />;
 
             default: {
-                return;
+                return next();
             }
         }
     };
@@ -335,11 +357,13 @@ export default class TextEditor extends Component {
                 <Editor
                     spellCheck
                     autoFocus
+                    tabIndex={-1}
                     placeholder={'Enter text here...'}
+                    plugins={plugins}
                     value={this.state.value}
                     ref={this.ref}
                     onChange={this.onChange}
-                    //onKeyDown={this.onKeyDown}
+                    onKeyDown={this.onKeyDown}
                     renderMark={this.renderMark}
                     renderNode={this.renderNode}
                 />
