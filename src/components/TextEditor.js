@@ -14,7 +14,9 @@ import {arrowDown} from 'react-icons-kit/metrize/arrowDown'
 import {quote} from 'react-icons-kit/metrize/quote'
 import {listOl} from 'react-icons-kit/fa/listOl'
 import {listUl} from 'react-icons-kit/fa/listUl'
+import {image} from 'react-icons-kit/fa/image'
 import {Editor} from 'slate-react'
+import Image from './Image'
 
 import {BoldMark, CodeMark, ItalicMark, UnderlineMark} from './index'
 
@@ -79,6 +81,17 @@ const plugins = [
     MarkHotkey({key: 'u', type: 'underline'}),
     MarkHotkey({key: '`', type: 'code'}),
 ];
+
+function insertImage(editor, src, target) {
+    if (target) {
+        editor.select(target)
+    }
+
+    editor.insertBlock({
+        type: 'image',
+        data: { src },
+    })
+}
 
 export default class TextEditor extends Component {
 
@@ -302,7 +315,7 @@ export default class TextEditor extends Component {
     };
 
     renderNode = (props, editor, next) => {
-        const {attributes, children, node} = props;
+        const {attributes, children, node, isFocused} = props;
 
         switch (node.type) {
             case 'block-quote':
@@ -317,9 +330,19 @@ export default class TextEditor extends Component {
                 return <li {...attributes}>{children}</li>;
             case 'numbered-list':
                 return <ol {...attributes}>{children}</ol>;
+            case 'image':
+                const src = node.data.get('src')
+                return <Image src={src} selected={isFocused} {...attributes} />;
             default:
-                return next()
+                return next();
         }
+    };
+
+    onImageClick = event => {
+        event.preventDefault()
+        const src = window.prompt('Enter the URL of the image:')
+        if (!src) return
+        this.editor.command(insertImage, src)
     };
 
     render() {
@@ -352,6 +375,9 @@ export default class TextEditor extends Component {
                     </button>
                     <button className="button" onPointerDown={(event) => this.onBlockClick(event, 'bulleted-list')}>
                         <Icon icon={listUl}/>
+                    </button>
+                    <button className="button" onPointerDown={this.onImageClick}>
+                        <Icon icon={image}/>
                     </button>
                 </Toolbar>
                 <Editor
