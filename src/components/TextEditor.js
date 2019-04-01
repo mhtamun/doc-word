@@ -1,5 +1,5 @@
 import React, {Component, Fragment} from 'react'
-import {Value} from 'slate'
+import {Block, Value} from 'slate'
 import {isKeyHotkey} from 'is-hotkey'
 import 'react-bootstrap/dist/react-bootstrap';
 
@@ -15,6 +15,7 @@ import {quote} from 'react-icons-kit/metrize/quote'
 import {listOl} from 'react-icons-kit/fa/listOl'
 import {listUl} from 'react-icons-kit/fa/listUl'
 import {image} from 'react-icons-kit/fa/image'
+import {upload} from 'react-icons-kit/fa/upload'
 import {Editor} from 'slate-react'
 import Image from './Image'
 
@@ -28,23 +29,41 @@ const isShiftTab = isKeyHotkey('shift+tab');
 // Create our initial value...
 const initialValue = Value.fromJSON(
     {
-        "object": "value",
         "document": {
-            "object": "document",
-            "data": {},
             "nodes": [
                 {
                     "object": "block",
                     "type": "paragraph",
-                    "data": {},
                     "nodes": [
                         {
                             "object": "text",
                             "leaves": [
                                 {
-                                    "object": "leaf",
-                                    "text": "A line of text in a paragraph.",
-                                    "marks": []
+                                    "text":
+                                        "In addition to nodes that contain editable text, you can also create other types of nodes, like images or videos."
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "object": "block",
+                    "type": "image",
+                    "data": {
+                        "src":
+                            "https://img.washingtonpost.com/wp-apps/imrs.php?src=https://img.washingtonpost.com/news/speaking-of-science/wp-content/uploads/sites/36/2015/10/as12-49-7278-1024x1024.jpg&w=1484"
+                    }
+                },
+                {
+                    "object": "block",
+                    "type": "paragraph",
+                    "nodes": [
+                        {
+                            "object": "text",
+                            "leaves": [
+                                {
+                                    "text":
+                                        "This example shows images in action. It features two ways to add images. You can either add an image via the toolbar icon above, or if you want in on a little secret, copy an image URL to your keyboard and paste it anywhere in the editor!"
                                 }
                             ]
                         }
@@ -82,16 +101,35 @@ const plugins = [
     MarkHotkey({key: '`', type: 'code'}),
 ];
 
-function insertImage(editor, src, target) {
+const schema = {
+    document: {
+        last: {type: 'paragraph'},
+        normalize: (editor, {code, node, child}) => {
+            switch (code) {
+                case 'last_child_type_invalid': {
+                    const paragraph = Block.create('paragraph');
+                    return editor.insertNodeByKey(node.key, node.nodes.size, paragraph)
+                }
+            }
+        },
+    },
+    blocks: {
+        image: {
+            isVoid: true
+        }
+    }
+};
+
+const insertImage = (editor, src, target) => {
     if (target) {
         editor.select(target)
     }
 
     editor.insertBlock({
         type: 'image',
-        data: { src },
-    })
-}
+        data: {src},
+    });
+};
 
 export default class TextEditor extends Component {
 
@@ -149,7 +187,7 @@ export default class TextEditor extends Component {
                 console.log(block['type']);
                 console.log(block['key']);
 
-                if (block.type === 'numbered-list' || block.type === 'bulleted-list'){
+                if (block.type === 'numbered-list' || block.type === 'bulleted-list') {
                     block.nodes.forEach(block => {
                         console.log('Level 1 Blocks: ');
                         console.log(block['type']);
@@ -157,7 +195,7 @@ export default class TextEditor extends Component {
 
                         isLevelThree = false;
 
-                        if (block.type === 'numbered-list' || block.type === 'bulleted-list'){
+                        if (block.type === 'numbered-list' || block.type === 'bulleted-list') {
                             block.nodes.forEach(block => {
                                 console.log('Level 2 Blocks: ');
                                 console.log(block['type']);
@@ -165,7 +203,7 @@ export default class TextEditor extends Component {
 
                                 isLevelThree = false;
 
-                                if (block.type === 'numbered-list' || block.type === 'bulleted-list'){
+                                if (block.type === 'numbered-list' || block.type === 'bulleted-list') {
                                     console.log('Level 3 Blocks: ');
                                     console.log(block['type']);
                                     console.log(block['key']);
@@ -196,7 +234,7 @@ export default class TextEditor extends Component {
                 console.log(block['type']);
                 console.log(block['key']);
 
-                if (block.type === 'numbered-list' || block.type === 'bulleted-list'){
+                if (block.type === 'numbered-list' || block.type === 'bulleted-list') {
                     block.nodes.forEach(block => {
                         console.log('Level 1 Blocks: ');
                         console.log(block['type']);
@@ -204,7 +242,7 @@ export default class TextEditor extends Component {
 
                         isLevelOne = true;
 
-                        if (block.type === 'numbered-list' || block.type === 'bulleted-list'){
+                        if (block.type === 'numbered-list' || block.type === 'bulleted-list') {
                             block.nodes.forEach(block => {
                                 console.log('Level 2 Blocks: ');
                                 console.log(block['type']);
@@ -212,7 +250,7 @@ export default class TextEditor extends Component {
 
                                 isLevelOne = false;
 
-                                if (block.type === 'numbered-list' || block.type === 'bulleted-list'){
+                                if (block.type === 'numbered-list' || block.type === 'bulleted-list') {
                                     console.log('Level 3 Blocks: ');
                                     console.log(block['type']);
                                     console.log(block['key']);
@@ -225,13 +263,13 @@ export default class TextEditor extends Component {
                 }
             });
             if (isBlockListItemType && isParentBlockNumberedListType) {
-                if (isLevelOne){
+                if (isLevelOne) {
                     editor.setBlocks(DEFAULT_NODE).unwrapBlock('list-item').unwrapBlock('numbered-list')
                 } else {
                     editor.unwrapBlock('list-item').unwrapBlock('numbered-list')
                 }
             } else if (isBlockListItemType && isParentBlockBulletedListType) {
-                if (isLevelOne){
+                if (isLevelOne) {
                     editor.setBlocks(DEFAULT_NODE).unwrapBlock('list-item').unwrapBlock('bulleted-list')
                 } else {
                     editor.unwrapBlock('list-item').unwrapBlock('bulleted-list')
@@ -331,7 +369,7 @@ export default class TextEditor extends Component {
             case 'numbered-list':
                 return <ol {...attributes}>{children}</ol>;
             case 'image':
-                const src = node.data.get('src')
+                const src = node.data.get('src');
                 return <Image src={src} selected={isFocused} {...attributes} />;
             default:
                 return next();
@@ -339,10 +377,38 @@ export default class TextEditor extends Component {
     };
 
     onImageClick = event => {
-        event.preventDefault()
-        const src = window.prompt('Enter the URL of the image:')
-        if (!src) return
+        event.preventDefault();
+        const src = window.prompt('Enter the URL of the image:');
+        if (!src) return;
         this.editor.command(insertImage, src)
+    };
+
+    onFileSelect = event => {
+        event.preventDefault();
+
+        let file;
+        try {
+            file = event.target.files[0];
+            console.log(file);
+
+            const validImageTypes = ['image/gif', 'image/jpeg', 'image/jpg', 'image/png'];
+            if (validImageTypes.includes(file.type)) {
+                console.log('This is image type file.');
+
+                const reader = new FileReader();
+                const [mime] = file.type.split('/');
+                if (mime === 'image') {
+
+                    reader.addEventListener('load', () => {
+                        this.editor.command(insertImage, reader.result)
+                    });
+
+                    reader.readAsDataURL(file)
+                }
+            }
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     render() {
@@ -376,9 +442,11 @@ export default class TextEditor extends Component {
                     <button className="button" onPointerDown={(event) => this.onBlockClick(event, 'bulleted-list')}>
                         <Icon icon={listUl}/>
                     </button>
-                    <button className="button" onPointerDown={this.onImageClick}>
+                    <button className="button" onPointerDown={(event) => this.onImageClick(event)}>
                         <Icon icon={image}/>
                     </button>
+                    <input className="button" type="file" onChange={(event) => this.onFileSelect(event)}/>
+
                 </Toolbar>
                 <Editor
                     spellCheck
@@ -386,6 +454,7 @@ export default class TextEditor extends Component {
                     tabIndex={-1}
                     placeholder={'Enter text here...'}
                     plugins={plugins}
+                    schema={schema}
                     value={this.state.value}
                     ref={this.ref}
                     onChange={this.onChange}
