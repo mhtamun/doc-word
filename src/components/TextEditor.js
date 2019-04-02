@@ -130,6 +130,7 @@ export default class TextEditor extends Component {
 
         this.state = {
             value: initialValue,
+            topLevelBlockLimit: 0,
         };
     }
 
@@ -143,6 +144,13 @@ export default class TextEditor extends Component {
     };
 
     // On change, update the app's React state with the new editor value.
+    onChangeInputOfTopLevelBlockLimit = event => {
+        console.log(event.target.name, event.target.value);
+        this.setState({
+            topLevelBlockLimit: event.target.value
+        });
+    };
+
     onChange = ({value}) => {
         console.log(JSON.stringify(value));
         this.setState({value})
@@ -280,6 +288,15 @@ export default class TextEditor extends Component {
         if (typeof (Storage) !== "undefined") {
             // Save the value to Local Storage.
             const content = JSON.stringify(this.state.value.toJSON());
+            console.log('Content ', content);
+
+            const contentObject = JSON.parse(content);
+
+            if (contentObject.document.nodes.length > this.state.topLevelBlockLimit && this.state.topLevelBlockLimit != 0){
+                alert('Can not save due crossed the limit of blocks \nYou set the limit is ' + this.state.topLevelBlockLimit)
+                return;
+            }
+
             localStorage.setItem('content', content)
         } else {
             console.log('Sorry, your browser does not support Web Storage...')
@@ -461,6 +478,13 @@ export default class TextEditor extends Component {
         return (
             <Fragment>
                 <Toolbar>
+                    <span>Enter the limit of blocks </span>
+                    <input name={"topLevelBlockLimit"}
+                           type={"number"}
+                           value={ this.state.topLevelBlockLimit === 0 ? 0 : this.state.topLevelBlockLimit}
+                           onChange={this.onChangeInputOfTopLevelBlockLimit} />
+                </Toolbar>
+                <Toolbar>
                     <button className="button" onPointerDown={(event) => this.onSaveClick(event)}>
                         Save
                     </button>
@@ -519,9 +543,6 @@ export default class TextEditor extends Component {
     }
 
     componentDidMount() {
-        // if (localStorage.getItem('value') !== null) {
-        //     const slateValue = Value.fromJSON(localStorage.getItem('value'));
-        //     this.setState({value: slateValue})
-        // }
+
     }
 }
