@@ -28,9 +28,11 @@ const DEFAULT_NODE = 'paragraph';
 const isTab = isKeyHotkey('tab');
 const isShiftTab = isKeyHotkey('shift+tab');
 
+// Update the initial content to be pulled from Local Storage if it exists.
+const existingValue = JSON.parse(localStorage.getItem('content'));
 // Create our initial value...
 const initialValue = Value.fromJSON(
-    {
+    existingValue || {
         "document": {
             "nodes": [
                 {
@@ -42,35 +44,12 @@ const initialValue = Value.fromJSON(
                             "leaves": [
                                 {
                                     "text":
-                                        "In addition to nodes that contain editable text, you can also create other types of nodes, like images or videos."
+                                        ""
                                 }
                             ]
                         }
                     ]
                 },
-                {
-                    "object": "block",
-                    "type": "image",
-                    "data": {
-                        "src":
-                            "https://img.washingtonpost.com/wp-apps/imrs.php?src=https://img.washingtonpost.com/news/speaking-of-science/wp-content/uploads/sites/36/2015/10/as12-49-7278-1024x1024.jpg&w=1484"
-                    }
-                },
-                {
-                    "object": "block",
-                    "type": "paragraph",
-                    "nodes": [
-                        {
-                            "object": "text",
-                            "leaves": [
-                                {
-                                    "text":
-                                        "This example shows images in action. It features two ways to add images. You can either add an image via the toolbar icon above, or if you want in on a little secret, copy an image URL to your keyboard and paste it anywhere in the editor!"
-                                }
-                            ]
-                        }
-                    ]
-                }
             ]
         }
     }
@@ -293,6 +272,26 @@ export default class TextEditor extends Component {
         return next();
     };
 
+    onSaveClick = (event) => {
+        event.preventDefault();
+
+        console.log('onSaveClick');
+
+        if (typeof (Storage) !== "undefined") {
+            // Save the value to Local Storage.
+            const content = JSON.stringify(this.state.value.toJSON());
+            localStorage.setItem('content', content)
+        } else {
+            console.log('Sorry, your browser does not support Web Storage...')
+        }
+    };
+
+    onCancelClick = (event) => {
+        event.preventDefault();
+
+        this.setState({value: initialValue})
+    };
+
     onMarkClick = (event, type) => {
         event.preventDefault();
 
@@ -393,7 +392,7 @@ export default class TextEditor extends Component {
                 {
                     label: 'Yes',
                     onClick: () => {
-                        console.log('Download started...')
+                        console.log('Download started...');
                         const link = document.createElement('a');
                         link.download = name;
                         link.href = src.toString();
@@ -462,6 +461,12 @@ export default class TextEditor extends Component {
         return (
             <Fragment>
                 <Toolbar>
+                    <button className="button" onPointerDown={(event) => this.onSaveClick(event)}>
+                        Save
+                    </button>
+                    <button className="button" onPointerDown={(event) => this.onCancelClick(event)}>
+                        Cancel
+                    </button>
                     <button className="button" onPointerDown={(event) => this.onMarkClick(event, 'bold')}>
                         <Icon icon={bold}/>
                     </button>
@@ -511,5 +516,12 @@ export default class TextEditor extends Component {
                 />
             </Fragment>
         )
+    }
+
+    componentDidMount() {
+        // if (localStorage.getItem('value') !== null) {
+        //     const slateValue = Value.fromJSON(localStorage.getItem('value'));
+        //     this.setState({value: slateValue})
+        // }
     }
 }
