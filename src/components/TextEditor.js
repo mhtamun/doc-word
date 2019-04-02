@@ -1,6 +1,8 @@
 import React, {Component, Fragment} from 'react'
 import {Block, Value} from 'slate'
 import {isKeyHotkey} from 'is-hotkey'
+import {confirmAlert} from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css';
 import 'react-bootstrap/dist/react-bootstrap';
 
 import Toolbar from './Toolbar'
@@ -15,7 +17,6 @@ import {quote} from 'react-icons-kit/metrize/quote'
 import {listOl} from 'react-icons-kit/fa/listOl'
 import {listUl} from 'react-icons-kit/fa/listUl'
 import {image} from 'react-icons-kit/fa/image'
-import {upload} from 'react-icons-kit/fa/upload'
 import {file} from 'react-icons-kit/fa/file'
 import {Editor} from 'slate-react'
 import Image from './Image'
@@ -118,7 +119,7 @@ const schema = {
         image: {
             isVoid: true
         }
-    }
+    },
 };
 
 const insertImage = (editor, src, target) => {
@@ -127,19 +128,19 @@ const insertImage = (editor, src, target) => {
     }
 
     editor.insertBlock({
-        type: 'image',
+        type: 'image-file',
         data: {src},
     });
 };
 
-const insertDocument = (editor, src, target) => {
+const insertDocument = (editor, src, name, target) => {
     if (target) {
         editor.select(target)
     }
 
     editor.insertBlock({
-        type: 'document',
-        data: {src},
+        type: 'document-file',
+        data: {src, name},
     });
 };
 
@@ -354,38 +355,58 @@ export default class TextEditor extends Component {
     onFileSelect = event => {
         event.preventDefault();
 
-        let file;
-        try {
-            file = event.target.files[0];
-            console.log(file);
+        const file = event.target.files[0];
+        console.log('File ', file);
 
-            const validImageTypes = ['image/gif', 'image/jpeg', 'image/jpg', 'image/png'];
-            const validDocumentTypes = ['application/txt', 'application/pdf'];
+        const validImageTypes = ['image/gif', 'image/jpeg', 'image/jpg', 'image/png'];
+        const validDocumentTypes = ['text/plain', 'application/pdf'];
 
-            const reader = new FileReader();
+        const reader = new FileReader();
 
-            if (validImageTypes.includes(file.type)) {
-                console.log('This is image type file.');
+        if (validImageTypes.includes(file.type)) {
+            console.log('This is image type file.');
 
-                reader.addEventListener('load', () => {
-                    this.editor.command(insertImage, reader.result)
-                });
+            reader.addEventListener('load', () => {
+                this.editor.command(insertImage, reader.result)
+            });
 
-                reader.readAsDataURL(file)
-            } else if (validDocumentTypes.includes(file.type)) {
-                console.log('This is image type file.');
+            reader.readAsDataURL(file)
+        } else if (validDocumentTypes.includes(file.type)) {
+            console.log('This is document type file.');
 
-                reader.addEventListener('load', () => {
-                    this.editor.command(insertDocument, reader.result)
-                });
+            reader.addEventListener('load', () => {
+                this.editor.command(insertDocument, reader.result, file.name)
+            });
 
-                reader.readAsDataURL(file)
-            } else {
-                alert('Invalid file type.')
-            }
-        } catch (error) {
-            console.log(error);
+            reader.readAsDataURL(file)
+        } else {
+            alert('Invalid file type.')
         }
+    };
+
+    onDocumentFileClick = (event, name, src) => {
+        event.preventDefault();
+        confirmAlert({
+            title: 'Are you sure?',
+            message: 'Want to download ' + name,
+            buttons: [
+                {
+                    label: 'Yes',
+                    onClick: () => {
+                        console.log('Download started...')
+                        const link = document.createElement('a');
+                        link.download = name;
+                        link.href = src.toString();
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    }
+                },
+                {
+                    label: 'No',
+                }
+            ]
+        });
     };
 
     renderMark = (props, editor, next) => {
@@ -414,8 +435,6 @@ export default class TextEditor extends Component {
         switch (node.type) {
             case 'block-quote':
                 return <blockquote {...attributes}>{children}</blockquote>;
-            case 'bulleted-list':
-                return <ul {...attributes}>{children}</ul>;
             case 'heading-one':
                 return <h1 {...attributes}>{children}</h1>;
             case 'heading-two':
@@ -424,11 +443,16 @@ export default class TextEditor extends Component {
                 return <li {...attributes}>{children}</li>;
             case 'numbered-list':
                 return <ol {...attributes}>{children}</ol>;
-            case 'image':
-                const src = node.data.get('src');
-                return <Image src={src} selected={isFocused} {...attributes} />;
-            case 'document':
-                return <span><Icon icon={file}/>{children}</span>;
+            case 'bulleted-list':
+                return <ul {...attributes}>{children}</ul>;
+            case 'image-file':
+                const imageSrc = node.data.get('src');
+                return <Image src={imageSrc} selected={isFocused} {...attributes} />;
+            case 'document-file':
+                const documentSrc = node.data.get('src');
+                const name = node.data.get('name');
+                return <span id="document-file" onClick={(event) => this.onDocumentFileClick(event, name, documentSrc)}><Icon
+                    icon={file}/>{name}</span>;
             default:
                 return next();
         }
