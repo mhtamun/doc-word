@@ -2,9 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="5ed4b215-54a9-4f54-b029-046c9cb833fa" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/TextEditor.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/TextEditor.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/value.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/value.json" afterDir="false" />
     </list>
@@ -31,8 +28,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/components/TextEditor.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2005">
-              <caret line="509" column="48" lean-forward="true" selection-start-line="509" selection-start-column="48" selection-end-line="509" selection-end-column="48" />
+            <state relative-caret-position="347">
+              <caret line="453" column="28" selection-start-line="453" selection-start-column="28" selection-end-line="453" selection-end-column="28" />
               <folding>
                 <element signature="e#0#48#0" expanded="true" />
               </folding>
@@ -43,8 +40,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/value.json">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="789">
-              <caret line="132" column="1" selection-start-line="132" selection-start-column="1" selection-end-line="132" selection-end-column="1" />
+            <state relative-caret-position="1428">
+              <caret line="96" column="7" selection-start-line="96" selection-start-column="7" selection-end-line="96" selection-end-column="7" />
             </state>
           </provider>
         </entry>
@@ -142,7 +139,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="49726000" />
+    <option name="totallyTimeSpent" value="50358000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1986" y="-11" width="1855" height="1092" extended-state="6" />
@@ -162,7 +159,7 @@
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="8" weight="0.8025078" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" weight="0.32936078" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="10" visible="true" weight="0.32810867" />
+      <window_info anchor="bottom" id="Terminal" order="10" weight="0.32810867" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -261,20 +258,6 @@
     <entry file="file://$PROJECT_DIR$/package.json">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/node_modules/slate/lib/slate.es.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="316">
-          <caret line="10614" selection-start-line="10614" selection-end-line="10614" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/value.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="789">
-          <caret line="132" column="1" selection-start-line="132" selection-start-column="1" selection-end-line="132" selection-end-column="1" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/components/Image.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="51">
@@ -285,10 +268,24 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/value.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1428">
+          <caret line="96" column="7" selection-start-line="96" selection-start-column="7" selection-end-line="96" selection-end-column="7" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/node_modules/slate/lib/slate.es.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="301">
+          <caret line="10618" column="6" selection-start-line="10618" selection-start-column="6" selection-end-line="10618" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/components/TextEditor.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2005">
-          <caret line="509" column="48" lean-forward="true" selection-start-line="509" selection-start-column="48" selection-end-line="509" selection-end-column="48" />
+        <state relative-caret-position="347">
+          <caret line="453" column="28" selection-start-line="453" selection-start-column="28" selection-end-line="453" selection-end-column="28" />
           <folding>
             <element signature="e#0#48#0" expanded="true" />
           </folding>

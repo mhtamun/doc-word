@@ -128,7 +128,7 @@ const insertImage = (editor, src, target) => {
     }
 
     editor.insertBlock({
-        type: 'image-file',
+        type: 'image',
         data: {src},
     });
 };
@@ -445,13 +445,13 @@ export default class TextEditor extends Component {
                 return <ol {...attributes}>{children}</ol>;
             case 'bulleted-list':
                 return <ul {...attributes}>{children}</ul>;
-            case 'image-file':
+            case 'image':
                 const imageSrc = node.data.get('src');
                 return <Image src={imageSrc} selected={isFocused} {...attributes} />;
             case 'document-file':
                 const documentSrc = node.data.get('src');
                 const name = node.data.get('name');
-                return <span id="document-file" onClick={(event) => this.onDocumentFileClick(event, name, documentSrc)}><Icon
+                return <span onClick={(event) => this.onDocumentFileClick(event, name, documentSrc)}><Icon
                     icon={file}/>{name}</span>;
             default:
                 return next();
