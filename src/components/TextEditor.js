@@ -16,6 +16,7 @@ import {listOl} from 'react-icons-kit/fa/listOl'
 import {listUl} from 'react-icons-kit/fa/listUl'
 import {image} from 'react-icons-kit/fa/image'
 import {upload} from 'react-icons-kit/fa/upload'
+import {file} from 'react-icons-kit/fa/file'
 import {Editor} from 'slate-react'
 import Image from './Image'
 
@@ -127,6 +128,17 @@ const insertImage = (editor, src, target) => {
 
     editor.insertBlock({
         type: 'image',
+        data: {src},
+    });
+};
+
+const insertDocument = (editor, src, target) => {
+    if (target) {
+        editor.select(target)
+    }
+
+    editor.insertBlock({
+        type: 'document',
         data: {src},
     });
 };
@@ -332,6 +344,50 @@ export default class TextEditor extends Component {
         }
     };
 
+    onImageClick = event => {
+        event.preventDefault();
+        const src = window.prompt('Enter the URL of the image:');
+        if (!src) return;
+        this.editor.command(insertImage, src)
+    };
+
+    onFileSelect = event => {
+        event.preventDefault();
+
+        let file;
+        try {
+            file = event.target.files[0];
+            console.log(file);
+
+            const validImageTypes = ['image/gif', 'image/jpeg', 'image/jpg', 'image/png'];
+            const validDocumentTypes = ['application/txt', 'application/pdf'];
+
+            const reader = new FileReader();
+
+            if (validImageTypes.includes(file.type)) {
+                console.log('This is image type file.');
+
+                reader.addEventListener('load', () => {
+                    this.editor.command(insertImage, reader.result)
+                });
+
+                reader.readAsDataURL(file)
+            } else if (validDocumentTypes.includes(file.type)) {
+                console.log('This is image type file.');
+
+                reader.addEventListener('load', () => {
+                    this.editor.command(insertDocument, reader.result)
+                });
+
+                reader.readAsDataURL(file)
+            } else {
+                alert('Invalid file type.')
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     renderMark = (props, editor, next) => {
         switch (props.mark.type) {
             case 'bold':
@@ -371,43 +427,10 @@ export default class TextEditor extends Component {
             case 'image':
                 const src = node.data.get('src');
                 return <Image src={src} selected={isFocused} {...attributes} />;
+            case 'document':
+                return <span><Icon icon={file}/>{children}</span>;
             default:
                 return next();
-        }
-    };
-
-    onImageClick = event => {
-        event.preventDefault();
-        const src = window.prompt('Enter the URL of the image:');
-        if (!src) return;
-        this.editor.command(insertImage, src)
-    };
-
-    onFileSelect = event => {
-        event.preventDefault();
-
-        let file;
-        try {
-            file = event.target.files[0];
-            console.log(file);
-
-            const validImageTypes = ['image/gif', 'image/jpeg', 'image/jpg', 'image/png'];
-            if (validImageTypes.includes(file.type)) {
-                console.log('This is image type file.');
-
-                const reader = new FileReader();
-                const [mime] = file.type.split('/');
-                if (mime === 'image') {
-
-                    reader.addEventListener('load', () => {
-                        this.editor.command(insertImage, reader.result)
-                    });
-
-                    reader.readAsDataURL(file)
-                }
-            }
-        } catch (error) {
-            console.log(error);
         }
     };
 
