@@ -1,5 +1,6 @@
 import React, {Component, Fragment} from 'react'
 import {Block, Value} from 'slate'
+import {Editor, getEventRange, getEventTransfer} from 'slate-react'
 import {isKeyHotkey} from 'is-hotkey'
 import {confirmAlert} from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
@@ -17,8 +18,8 @@ import {quote} from 'react-icons-kit/metrize/quote'
 import {listOl} from 'react-icons-kit/fa/listOl'
 import {listUl} from 'react-icons-kit/fa/listUl'
 import {image} from 'react-icons-kit/fa/image'
+import {fileImageO} from 'react-icons-kit/fa/fileImageO'
 import {file} from 'react-icons-kit/fa/file'
-import {Editor} from 'slate-react'
 import Image from './Image'
 
 import {BoldMark, CodeMark, ItalicMark, UnderlineMark} from './index'
@@ -86,37 +87,38 @@ const schema = {
     document: {
         last: {type: 'paragraph'},
         normalize: (editor, {code, node, child}) => {
-            switch (code) {
-                case 'last_child_type_invalid': {
-                    const paragraph = Block.create('paragraph');
-                    return editor.insertNodeByKey(node.key, node.nodes.size, paragraph)
-                }
+            if (code === 'last_child_type_invalid') {
+                const paragraph = Block.create('paragraph');
+                return editor.insertNodeByKey(node.key, node.nodes.size, paragraph)
             }
         },
     },
     blocks: {
         image: {
             isVoid: true
-        }
+        },
+        file: {
+            isVoid: true
+        },
     },
 };
 
 const insertImage = (editor, src, target) => {
     if (target) {
-        editor.select(target)
+        editor.select(target);
+        console.log('Target selected');
     }
 
     editor.insertBlock({
         type: 'image',
         data: {src},
     });
-
-    editor.focus();
 };
 
 const insertDocument = (editor, src, name, target) => {
     if (target) {
-        editor.select(target)
+        editor.select(target);
+        console.log('Target selected');
     }
 
     editor.insertBlock({
@@ -154,7 +156,7 @@ export default class TextEditor extends Component {
     };
 
     onChange = ({value}) => {
-        console.log(JSON.stringify(value));
+        //console.log(JSON.stringify(value));
         this.setState({value})
     };
 
@@ -298,8 +300,8 @@ export default class TextEditor extends Component {
 
             const contentObject = JSON.parse(content);
 
-            if (contentObject.document.nodes.length > this.state.topLevelBlockLimit && this.state.topLevelBlockLimit != 0){
-                alert('Can not save due crossed the limit of blocks \nYou set the limit is ' + this.state.topLevelBlockLimit)
+            if (contentObject.document.nodes.length > this.state.topLevelBlockLimit && this.state.topLevelBlockLimit != 0) {
+                alert('Can not save due crossed the limit of blocks \nYou set the limit is ' + this.state.topLevelBlockLimit);
                 return;
             }
 
@@ -380,16 +382,22 @@ export default class TextEditor extends Component {
         const file = event.target.files[0];
         console.log('File ', file);
 
+        event.target.value = null;
+
         const validImageTypes = ['image/gif', 'image/jpeg', 'image/jpg', 'image/png'];
         const validDocumentTypes = ['text/plain', 'application/pdf'];
 
         const reader = new FileReader();
-
+        const target = getEventRange(event, this.editor);
+        console.log(target);
+        if (target){
+            console.log("hey you target");
+        }
         if (validImageTypes.includes(file.type)) {
             console.log('This is image type file.');
 
             reader.addEventListener('load', () => {
-                this.editor.command(insertImage, reader.result)
+                this.editor.command(insertImage, reader.result, target, event)
             });
 
             reader.readAsDataURL(file)
@@ -397,13 +405,15 @@ export default class TextEditor extends Component {
             console.log('This is document type file.');
 
             reader.addEventListener('load', () => {
-                this.editor.command(insertDocument, reader.result, file.name)
+                this.editor.command(insertDocument, reader.result, file.name, target)
             });
 
             reader.readAsDataURL(file)
         } else {
             alert('Invalid file type.')
         }
+
+
     };
 
     onDocumentFileClick = (event, name, src) => {
@@ -473,25 +483,31 @@ export default class TextEditor extends Component {
             case 'document-file':
                 const documentSrc = node.data.get('src');
                 const name = node.data.get('name');
-                return <span onClick={(event) => this.onDocumentFileClick(event, name, documentSrc)}><Icon
-                    icon={file}/>{name}</span>;
+                return <a download={name}
+                          href={documentSrc}><span
+                    onClick={(event) => this.onDocumentFileClick(event, name, documentSrc)}><Icon
+                    icon={file}/>{name}</span></a>;
             default:
                 return next();
         }
     };
 
     render() {
+        const content = JSON.stringify(this.state.value.toJSON());
+        console.log('Content ', content);
+
+        const contentObject = JSON.parse(content);
         return (
             <Fragment>
                 <Toolbar>
                     <span>Enter the limit of blocks </span>
                     <input name={"topLevelBlockLimit"}
                            type={"number"}
-                           value={ this.state.topLevelBlockLimit === 0 ? 0 : this.state.topLevelBlockLimit}
-                           onChange={this.onChangeInputOfTopLevelBlockLimit} />
+                           value={this.state.topLevelBlockLimit === 0 ? 0 : this.state.topLevelBlockLimit}
+                           onChange={this.onChangeInputOfTopLevelBlockLimit}/>
                 </Toolbar>
                 <Toolbar>
-                    <button className="button" onPointerDown={(event) => this.onSaveClick(event)}>
+                    <button className="button" disabled={contentObject.document.nodes.length > this.state.topLevelBlockLimit && this.state.topLevelBlockLimit != 0} onPointerDown={(event) => this.onSaveClick(event)}>
                         Save
                     </button>
                     <button className="button" onPointerDown={(event) => this.onCancelClick(event)}>
@@ -527,7 +543,18 @@ export default class TextEditor extends Component {
                     <button className="button" onPointerDown={(event) => this.onImageClick(event)}>
                         <Icon icon={image}/>
                     </button>
-                    <input className="button" type="file" onChange={(event) => this.onFileSelect(event)}/>
+                    <div className="input-container">
+                        <Icon icon={fileImageO}/>
+                        <label>Image File</label>
+                        <input className="button" type="file" accept="image/*"
+                               onChange={(event) => this.onFileSelect(event)}/>
+                    </div>
+                    <div className="input-container">
+                        <Icon icon={file}/>
+                        <label>Document File</label>
+                        <input className="button" type="file" accept="application/pdf,text/plain"
+                               onChange={(event) => this.onFileSelect(event)}/>
+                    </div>
 
                 </Toolbar>
                 <Editor
