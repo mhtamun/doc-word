@@ -110,6 +110,8 @@ const insertImage = (editor, src, target) => {
         type: 'image',
         data: {src},
     });
+
+    editor.focus();
 };
 
 const insertDocument = (editor, src, name, target) => {
@@ -226,6 +228,8 @@ export default class TextEditor extends Component {
             } else if (isBlockListItemType && isParentBlockBulletedListType && !isLevelThree) {
                 editor.wrapBlock('bulleted-list');
             }
+
+            event.preventDefault();
         } else if (isShiftTab(event)) {
             let isLevelOne = false;
 
@@ -275,6 +279,8 @@ export default class TextEditor extends Component {
                     editor.unwrapBlock('list-item').unwrapBlock('bulleted-list')
                 }
             }
+
+            event.preventDefault();
         }
 
         return next();

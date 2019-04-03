@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="5ed4b215-54a9-4f54-b029-046c9cb833fa" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/TextEditor.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/TextEditor.js" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/node_modules/" />
     <ignored path="$PROJECT_DIR$/.tmp/" />
@@ -20,27 +18,15 @@
     <favorites_list name="doc-word" />
   </component>
   <component name="FileEditorManager">
-    <leaf>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/SAMPLE.md">
-          <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
-            <state split_layout="SPLIT">
-              <first_editor relative-caret-position="492">
-                <caret line="31" lean-forward="true" selection-end-line="31" />
-              </first_editor>
-              <second_editor />
-            </state>
-          </provider>
-        </entry>
-      </file>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/README.md">
-          <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
-            <state split_layout="SPLIT">
-              <first_editor relative-caret-position="475">
-                <caret line="31" lean-forward="true" selection-start-line="31" selection-end-line="31" />
-              </first_editor>
-              <second_editor />
+        <entry file="file://$PROJECT_DIR$/src/components/TextEditor.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="361">
+              <caret line="113" column="19" selection-start-line="113" selection-start-column="19" selection-end-line="113" selection-end-column="19" />
+              <folding>
+                <element signature="e#0#48#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -65,10 +51,10 @@
         <option value="$PROJECT_DIR$/src/components/Image.js" />
         <option value="$PROJECT_DIR$/src/value.json.js" />
         <option value="$PROJECT_DIR$/src/value.json" />
-        <option value="$PROJECT_DIR$/src/components/TextEditor.js" />
         <option value="$PROJECT_DIR$/package.json" />
         <option value="$PROJECT_DIR$/src/SAMPLE.md" />
         <option value="$PROJECT_DIR$/README.md" />
+        <option value="$PROJECT_DIR$/src/components/TextEditor.js" />
       </list>
     </option>
   </component>
@@ -96,6 +82,12 @@
               <item name="doc-word" type="b2602c69:ProjectViewProjectNode" />
               <item name="doc-word" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="doc-word" type="b2602c69:ProjectViewProjectNode" />
+              <item name="doc-word" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="components" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -137,11 +129,12 @@
       <workItem from="1554048336000" duration="594000" />
       <workItem from="1554140472332" duration="9846000" />
       <workItem from="1554176698581" duration="3250000" />
+      <workItem from="1554278535655" duration="1259000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="57604000" />
+    <option name="totallyTimeSpent" value="58863000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1986" y="-11" width="1855" height="1092" extended-state="6" />
@@ -161,7 +154,7 @@
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="8" weight="0.8025078" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" weight="0.32936078" />
-      <window_info anchor="bottom" id="Terminal" order="10" visible="true" weight="0.32810867" />
+      <window_info anchor="bottom" id="Terminal" order="10" weight="0.32810867" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -274,16 +267,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/components/TextEditor.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-621">
-          <caret line="294" column="119" selection-start-line="294" selection-start-column="119" selection-end-line="294" selection-end-column="119" />
-          <folding>
-            <element signature="e#0#48#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/value.json">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1428">
@@ -298,23 +281,24 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/SAMPLE.md">
+    <entry file="file://$PROJECT_DIR$/src/SAMPLE.md" />
+    <entry file="file://$PROJECT_DIR$/README.md">
       <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
         <state split_layout="SPLIT">
-          <first_editor relative-caret-position="492">
-            <caret line="31" lean-forward="true" selection-end-line="31" />
+          <first_editor relative-caret-position="475">
+            <caret line="31" selection-start-line="31" selection-end-line="31" />
           </first_editor>
           <second_editor />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/README.md">
-      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
-        <state split_layout="SPLIT">
-          <first_editor relative-caret-position="475">
-            <caret line="31" lean-forward="true" selection-start-line="31" selection-end-line="31" />
-          </first_editor>
-          <second_editor />
+    <entry file="file://$PROJECT_DIR$/src/components/TextEditor.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="361">
+          <caret line="113" column="19" selection-start-line="113" selection-start-column="19" selection-end-line="113" selection-end-column="19" />
+          <folding>
+            <element signature="e#0#48#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
