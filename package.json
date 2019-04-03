@@ -1,6 +1,7 @@
 {
   "name": "doc-word",
   "version": "1.0.0",
+  "homepage": "https://mhtamun.github.io/doc-word/",
   "author": "Maruf Hossain",
   "license": "ISC",
   "repository": {
@@ -13,6 +14,7 @@
   "private": true,
   "dependencies": {
     "bootstrap": "^4.3.1",
+    "gh-pages": "^2.0.1",
     "immutable": "^4.0.0-rc.12",
     "is-hotkey": "latest",
     "react": "^16.8.6",
@@ -28,7 +30,10 @@
     "styled-icons": "^7.7.0"
   },
   "scripts": {
-    "start": "react-scripts start"
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": "react-app"
