@@ -24,6 +24,7 @@
     "react-emotion": "^10.0.0",
     "react-icons-kit": "^1.2.1",
     "react-scripts": "2.1.8",
+    "react-test-renderer": "^16.8.6",
     "slate": "^0.44.12",
     "slate-react": "^0.21.18",
     "styled-components": "^4.2.0",
@@ -32,6 +33,8 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build"
   },
