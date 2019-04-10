@@ -20,7 +20,7 @@ self.__precacheManifest = [
     "url": "/doc-word/static/css/2.6ad6030f.chunk.css"
   },
   {
-    "revision": "36491044622bb70561e9f8bec0ef5643",
+    "revision": "d7cf1cbdc4670041ce45baf6f6ac6001",
     "url": "/doc-word/index.html"
   }
 ];
