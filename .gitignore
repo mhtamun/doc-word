@@ -19,6 +19,7 @@
 .env.production.local
 
 # ide - WebStorm
+.idea
 /.idea
 /.idea/workspace.xml
 .workspace.xml

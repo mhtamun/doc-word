@@ -1,6 +1,6 @@
 import React, {Component, Fragment} from 'react'
-import {Block, Value} from 'slate'
-import {Editor, getEventRange} from 'slate-react'
+import {Value} from 'slate'
+import {Editor} from 'slate-react'
 import {isKeyHotkey} from 'is-hotkey'
 import {confirmAlert} from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
@@ -12,8 +12,8 @@ import {bold} from 'react-icons-kit/feather/bold'
 import {italic} from 'react-icons-kit/feather/italic'
 import {underline} from 'react-icons-kit/feather/underline'
 import {code} from 'react-icons-kit/feather/code'
-import {arrowUp} from 'react-icons-kit/metrize/arrowUp'
-import {arrowDown} from 'react-icons-kit/metrize/arrowDown'
+import {ic_looks_one} from 'react-icons-kit/md/ic_looks_one'
+import {ic_looks_two} from 'react-icons-kit/md/ic_looks_two'
 import {quote} from 'react-icons-kit/metrize/quote'
 import {listOl} from 'react-icons-kit/fa/listOl'
 import {listUl} from 'react-icons-kit/fa/listUl'
@@ -24,7 +24,9 @@ import Image from './Image'
 
 import {BoldMark, CodeMark, ItalicMark, UnderlineMark} from './index'
 
-const DEFAULT_NODE = 'paragraph';
+import schema from "../schema"
+import {downloadFile, insertFile, insertImage} from "../lib/file";
+import {formatOnClick, onEnterPressed, onShiftTabPressed, onTabPressed} from "../lib/text";
 
 const isTab = isKeyHotkey('tab');
 const isShiftTab = isKeyHotkey('shift+tab');
@@ -84,49 +86,24 @@ const plugins = [
     MarkHotkey({key: '`', type: 'code'}),
 ];
 
-const schema = {
-    document: {
-        last: {type: 'paragraph'},
-        normalize: (editor, {code, node, child}) => {
-            if (code === 'last_child_type_invalid') {
-                const paragraph = Block.create('paragraph');
-                return editor.insertNodeByKey(node.key, node.nodes.size, paragraph)
-            }
-        },
-    },
-    blocks: {
-        image: {
-            isVoid: true
-        },
-        file: {
-            isVoid: true
-        },
-    },
-};
+function save(value, topLevelBlockLimit) {
+    if (typeof (Storage) !== "undefined") {
+        // Save the value to Local Storage.
+        const content = JSON.stringify(value.toJSON());
+        console.log('Content ', content);
 
-const insertImage = (editor, src, target) => {
-    if (target) {
-        editor.select(target);
-        console.log('Target selected');
+        const contentObject = JSON.parse(content);
+
+        if (contentObject.document.nodes.length > topLevelBlockLimit && topLevelBlockLimit != '0') {
+            alert('Can not save due crossed the limit of blocks \nYou set the limit is ' + topLevelBlockLimit);
+            return;
+        }
+
+        localStorage.setItem('content', content)
+    } else {
+        console.log('Sorry, your browser does not support Web Storage...')
     }
-
-    editor.insertBlock({
-        type: 'image',
-        data: {src},
-    }).moveFocusToEndOfDocument();
-};
-
-const insertDocument = (editor, src, name, target) => {
-    if (target) {
-        editor.select(target);
-        console.log('Target selected');
-    }
-
-    editor.insertBlock({
-        type: 'file',
-        data: {src, name},
-    }).moveFocusToEndOfDocument();
-};
+}
 
 export default class TextEditor extends Component {
 
@@ -142,195 +119,36 @@ export default class TextEditor extends Component {
         this.inputFile = React.createRef();
     }
 
-    ref = editor => {
-        this.editor = editor
+    onDocumentFileClick = (event, name, src) => {
+        event.preventDefault();
+
+        confirmAlert({
+            title: 'Are you sure?',
+            message: 'Want to download ' + name,
+            buttons: [
+                {
+                    label: 'Yes',
+                    onClick: () => {
+                        downloadFile(name, src)
+                    }
+                },
+                {
+                    label: 'No',
+                }
+            ]
+        });
     };
 
-    hasBlock = type => {
-        const {value} = this.state;
-        //console.log('hasBlock', JSON.stringify(value.toJSON()));
-        return value.blocks.some(node => node.type === type)
-    };
-
-    // On change, update the app's React state with the new editor value.
     onChangeInputOfTopLevelBlockLimit = event => {
-        console.log(event.target.name, event.target.value);
         this.setState({
             topLevelBlockLimit: event.target.value
         });
     };
 
-    onChange = ({value}) => {
-        console.log('onChange value: ', JSON.stringify(value.toJSON()));
-        console.log('onChange current cursor on: ', JSON.stringify(value.blocks.toJSON()));
-        this.setState({value})
-    };
-
-    islevelOne = (event, editor, value,
-                  isBlockListItemType, isParentBlockNumberedListType, isParentBlockBulletedListType) => {
-        let isLevelOne = false;
-
-        value.document.nodes.forEach(block => {
-            console.log('Blocks: ');
-            console.log(block['type']);
-            console.log(block['key']);
-
-            if (block.type === 'numbered-list' || block.type === 'bulleted-list') {
-                block.nodes.forEach(block => {
-                    console.log('Level 1 Blocks: ');
-                    console.log(block['type']);
-                    console.log(block['key']);
-
-                    isLevelOne = true;
-
-                    if (block.type === 'numbered-list' || block.type === 'bulleted-list') {
-                        block.nodes.forEach(block => {
-                            console.log('Level 2 Blocks: ');
-                            console.log(block['type']);
-                            console.log(block['key']);
-
-                            isLevelOne = false;
-
-                            if (block.type === 'numbered-list' || block.type === 'bulleted-list') {
-                                console.log('Level 3 Blocks: ');
-                                console.log(block['type']);
-                                console.log(block['key']);
-
-                                isLevelOne = false;
-                            }
-                        });
-                    }
-                });
-            }
-        });
-
-        return isLevelOne;
-    };
-
-    onKeyDown = (event, editor, next) => {
-        const {value} = editor;
-        const {document} = value;
-
-        const isBlockListItemType = this.hasBlock('list-item');
-
-        console.log('Is block list-item type? ' + isBlockListItemType);
-
-        const isParentBlockNumberedListType = value.blocks.some(block => {
-            return !!document.getClosest(block.key, parent => parent.type === 'numbered-list')
-        });
-
-        const isParentBlockBulletedListType = value.blocks.some(block => {
-            return !!document.getClosest(block.key, parent => parent.type === 'bulleted-list')
-        });
-
-        console.log("Is parent block numbered-list type? " + isParentBlockNumberedListType);
-        console.log("Is parent block bulleted-list type? " + isParentBlockBulletedListType);
-
-        if (isTab(event)) {
-            let isLevelThree = false;
-
-            value.document.nodes.forEach(block => {
-                console.log('Blocks: ');
-                console.log(block['type']);
-                console.log(block['key']);
-
-                if (block.type === 'numbered-list' || block.type === 'bulleted-list') {
-                    block.nodes.forEach(block => {
-                        console.log('Level 1 Blocks: ');
-                        console.log(block['type']);
-                        console.log(block['key']);
-
-                        isLevelThree = false;
-
-                        if (block.type === 'numbered-list' || block.type === 'bulleted-list') {
-                            block.nodes.forEach(block => {
-                                console.log('Level 2 Blocks: ');
-                                console.log(block['type']);
-                                console.log(block['key']);
-
-                                isLevelThree = false;
-
-                                if (block.type === 'numbered-list' || block.type === 'bulleted-list') {
-                                    console.log('Level 3 Blocks: ');
-                                    console.log(block['type']);
-                                    console.log(block['key']);
-
-                                    isLevelThree = true;
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-
-            if (isBlockListItemType && isParentBlockNumberedListType && !isLevelThree) {
-                editor.wrapBlock('numbered-list');
-            } else if (isBlockListItemType && isParentBlockBulletedListType && !isLevelThree) {
-                editor.wrapBlock('bulleted-list');
-            }
-
-            event.preventDefault();
-        } else if (isShiftTab(event)) {
-            if (isBlockListItemType && isParentBlockNumberedListType) {
-                if (this.islevelOne(event, editor, value)) {
-                    editor.setBlocks(DEFAULT_NODE).unwrapBlock('list-item').unwrapBlock('numbered-list')
-                } else {
-                    editor.unwrapBlock('list-item').unwrapBlock('numbered-list')
-                }
-            } else if (isBlockListItemType && isParentBlockBulletedListType) {
-                if (this.islevelOne(event, editor, value)) {
-                    editor.setBlocks(DEFAULT_NODE).unwrapBlock('list-item').unwrapBlock('bulleted-list')
-                } else {
-                    editor.unwrapBlock('list-item').unwrapBlock('bulleted-list')
-                }
-            }
-
-            event.preventDefault();
-        } else if (isEnter(event)) {
-            if (isBlockListItemType && (isParentBlockNumberedListType || isParentBlockBulletedListType)) {
-                const valueAsObject = JSON.parse(JSON.stringify(value.blocks.toJSON()));
-                console.log(JSON.stringify(valueAsObject[0].nodes[0].leaves[0].text));
-
-                if (valueAsObject[0].nodes[0].leaves[0].text === '') {
-                    if (isBlockListItemType && isParentBlockNumberedListType) {
-                        if (this.islevelOne(event, editor, value)) {
-                            editor.setBlocks(DEFAULT_NODE).unwrapBlock('list-item').unwrapBlock('numbered-list')
-                        }
-                    } else if (isBlockListItemType && isParentBlockBulletedListType) {
-                        if (this.islevelOne(event, editor, value)) {
-                            editor.setBlocks(DEFAULT_NODE).unwrapBlock('list-item').unwrapBlock('bulleted-list')
-                        }
-                    }
-
-                    event.preventDefault();
-                }
-            }
-        }
-
-        return next();
-    };
-
     onSaveClick = (event) => {
         event.preventDefault();
 
-        console.log('onSaveClick');
-
-        if (typeof (Storage) !== "undefined") {
-            // Save the value to Local Storage.
-            const content = JSON.stringify(this.state.value.toJSON());
-            console.log('Content ', content);
-
-            const contentObject = JSON.parse(content);
-
-            if (contentObject.document.nodes.length > this.state.topLevelBlockLimit && this.state.topLevelBlockLimit != 0) {
-                alert('Can not save due crossed the limit of blocks \nYou set the limit is ' + this.state.topLevelBlockLimit);
-                return;
-            }
-
-            localStorage.setItem('content', content)
-        } else {
-            console.log('Sorry, your browser does not support Web Storage...')
-        }
+        save(this.state.value, this.state.topLevelBlockLimit);
     };
 
     onCancelClick = (event) => {
@@ -351,59 +169,28 @@ export default class TextEditor extends Component {
         event.preventDefault();
 
         const {editor} = this;
-        const {value} = editor;
-        const {document} = value;
 
-        // Handle everything but list buttons.
-        if (type !== 'bulleted-list' && type !== 'numbered-list') {
-            const isActive = this.hasBlock(type);
-            const isList = this.hasBlock('list-item');
-
-            if (isList) {
-                editor
-                    .setBlocks(isActive ? DEFAULT_NODE : type)
-                    .unwrapBlock('bulleted-list')
-                    .unwrapBlock('numbered-list')
-            } else {
-                editor.setBlocks(isActive ? DEFAULT_NODE : type)
-            }
-        } else {
-            // Handle the extra wrapping required for list buttons.
-            const isList = this.hasBlock('list-item');
-            const isType = value.blocks.some(block => {
-                return !!document.getClosest(block.key, parent => parent.type === type)
-            });
-
-            if (isList && isType) {
-                editor
-                    .setBlocks(DEFAULT_NODE)
-                    .unwrapBlock('bulleted-list')
-                    .unwrapBlock('numbered-list')
-            } else if (isList) {
-                editor
-                    .unwrapBlock(
-                        type === 'bulleted-list' ? 'numbered-list' : 'bulleted-list'
-                    )
-                    .wrapBlock(type)
-            } else {
-                editor.setBlocks('list-item').wrapBlock(type)
-            }
-        }
+        formatOnClick(editor, type)
     };
 
     onImageClick = event => {
         event.preventDefault();
+
         const src = window.prompt('Enter the URL of the image:');
+
         if (!src) return;
-        this.editor.command(insertImage, src)
+
+        this.editor.command(insertImage, src);
     };
 
     onOpenImage = event => {
         event.preventDefault();
+
         this.inputImageFile.current.click();
     };
     onOpenFile = event => {
         event.preventDefault();
+
         this.inputFile.current.click();
     };
 
@@ -411,61 +198,38 @@ export default class TextEditor extends Component {
         event.preventDefault();
 
         const file = event.target.files[0];
-        console.log('File ', file);
 
-        const validImageTypes = ['image/gif', 'image/jpeg', 'image/jpg', 'image/png'];
-        const validDocumentTypes = ['text/plain', 'application/pdf'];
-
-        const reader = new FileReader();
-        const target = getEventRange(event, this.editor);
-        console.log(target);
-        if (target) {
-            console.log("hey you target");
-        }
-        if (validImageTypes.includes(file.type)) {
-            console.log('This is image type file.');
-
-            reader.addEventListener('load', () => {
-                this.editor.command(insertImage, reader.result, target, event)
-            });
-
-            reader.readAsDataURL(file)
-        } else if (validDocumentTypes.includes(file.type)) {
-            console.log('This is document type file.');
-
-            reader.addEventListener('load', () => {
-                this.editor.command(insertDocument, reader.result, file.name, target)
-            });
-
-            reader.readAsDataURL(file)
-        } else {
-            alert('Invalid file type.')
-        }
+        insertFile(file, this.editor);
     };
 
-    onDocumentFileClick = (event, name, src) => {
-        event.preventDefault();
-        confirmAlert({
-            title: 'Are you sure?',
-            message: 'Want to download ' + name,
-            buttons: [
-                {
-                    label: 'Yes',
-                    onClick: () => {
-                        console.log('Download started...');
-                        const link = document.createElement('a');
-                        link.download = name;
-                        link.href = src.toString();
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                    }
-                },
-                {
-                    label: 'No',
-                }
-            ]
-        });
+    ref = editor => {
+        this.editor = editor;
+    };
+
+    // On change, update the app's React state with the new editor value.
+    onChange = ({value}) => {
+        console.log('onChange value: ', JSON.stringify(value.toJSON()));
+        console.log('onChange current cursor on: ', JSON.stringify(value.blocks.toJSON()));
+
+        this.setState({value});
+    };
+
+    onKeyDown = (event, editor, next) => {
+        if (isTab(event)) {
+            onTabPressed(editor);
+
+            event.preventDefault();
+        } else if (isShiftTab(event)) {
+            onShiftTabPressed(editor);
+
+            event.preventDefault();
+        } else if (isEnter(event)) {
+            onEnterPressed(editor);
+
+            event.preventDefault();
+        }
+
+        return next();
     };
 
     renderMark = (props, editor, next) => {
@@ -492,12 +256,12 @@ export default class TextEditor extends Component {
         const {attributes, children, node, isFocused} = props;
 
         switch (node.type) {
-            case 'block-quote':
-                return <blockquote {...attributes}>{children}</blockquote>;
             case 'heading-one':
                 return <h1 {...attributes}>{children}</h1>;
             case 'heading-two':
                 return <h2 {...attributes}>{children}</h2>;
+            case 'block-quote':
+                return <blockquote {...attributes}>{children}</blockquote>;
             case 'list-item':
                 return <li {...attributes}>{children}</li>;
             case 'numbered-list':
@@ -515,7 +279,7 @@ export default class TextEditor extends Component {
                         <span onClick={(event) => this.onDocumentFileClick(event, name, documentSrc)}>
                             <Icon icon={file}/> {name}
                         </span>
-                        </a>;
+                </a>;
             default:
                 return next();
         }
@@ -523,7 +287,6 @@ export default class TextEditor extends Component {
 
     render() {
         const content = JSON.stringify(this.state.value.toJSON());
-
         const contentObject = JSON.parse(content);
         return (
             <Fragment>
@@ -556,14 +319,14 @@ export default class TextEditor extends Component {
                         <Icon icon={code}/>
                     </button>
                     <button className="button" onPointerDown={(event) => this.onBlockClick(event, 'heading-one')}>
-                        <Icon icon={arrowUp}/>
+                        <Icon icon={ic_looks_one}/>
                     </button>
                     <button className="button" onPointerDown={(event) => this.onBlockClick(event, 'heading-two')}>
-                        <Icon icon={arrowDown}/>
+                        <Icon icon={ic_looks_two}/>
                     </button>
-                    <button className="button" onPointerDown={(event) => this.onBlockClick(event, 'block-quote')}>
-                        <Icon icon={quote}/>
-                    </button>
+                    {/*<button className="button" onPointerDown={(event) => this.onBlockClick(event, 'block-quote')}>*/}
+                        {/*<Icon icon={quote}/>*/}
+                    {/*</button>*/}
                     <button className="button" onPointerDown={(event) => this.onBlockClick(event, 'numbered-list')}>
                         <Icon icon={listOl}/>
                     </button>
