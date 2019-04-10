@@ -4,23 +4,23 @@ self.__precacheManifest = [
     "url": "/doc-word/static/js/runtime~main.1148acc3.js"
   },
   {
-    "revision": "27d6536649a4fb8d0a46",
-    "url": "/doc-word/static/js/main.d414d66e.chunk.js"
+    "revision": "7ece3965eb013ab2ed05",
+    "url": "/doc-word/static/js/main.a4984497.chunk.js"
   },
   {
-    "revision": "991e00b5dbe78287f3d2",
-    "url": "/doc-word/static/js/2.951b3b85.chunk.js"
+    "revision": "24fa1819d0d008e2c95f",
+    "url": "/doc-word/static/js/2.b30edf1e.chunk.js"
   },
   {
-    "revision": "27d6536649a4fb8d0a46",
+    "revision": "7ece3965eb013ab2ed05",
     "url": "/doc-word/static/css/main.61439323.chunk.css"
   },
   {
-    "revision": "991e00b5dbe78287f3d2",
+    "revision": "24fa1819d0d008e2c95f",
     "url": "/doc-word/static/css/2.6ad6030f.chunk.css"
   },
   {
-    "revision": "c2fb64c6c9e1a391407259ade07cf5be",
+    "revision": "36491044622bb70561e9f8bec0ef5643",
     "url": "/doc-word/index.html"
   }
 ];
